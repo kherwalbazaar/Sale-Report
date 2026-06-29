@@ -1,0 +1,18 @@
+{
+  "rules": {
+    "sales": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$saleId": {
+        ".validate": "newData.hasChildren(['id', 'dateTime', 'mrp', 'saleAmount', 'discount', 'paymentMode']) &&
+          newData.child('id').isNumber() &&
+          newData.child('dateTime').isString() &&
+          newData.child('mrp').isNumber() &&
+          newData.child('saleAmount').isNumber() &&
+          newData.child('discount').isNumber() &&
+          newData.child('paymentMode').isString() &&
+          (newData.hasChild('timestamp') ? newData.child('timestamp').isString() : true)"
+      }
+    }
+  }
+}
