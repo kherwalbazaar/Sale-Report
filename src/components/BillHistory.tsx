@@ -148,28 +148,72 @@ export default function BillHistory({ completedSales, onViewBill, onDeleteBill }
   const totalProfit = billGroups.reduce((sum, b) => sum + b.totalProfit, 0);
   const totalBills = billGroups.length;
 
+  // Weekly profits
+  interface WeekGroup { label: string; profit: number; revenue: number; bills: number; startDate: Date; }
+  const weekMap = new Map<string, WeekGroup>();
+
+  for (const bill of billGroups) {
+    const d = new Date(bill.items[0].createdAt || bill.items[0].checkedOutAt || Date.now());
+    const startOfWeek = new Date(d);
+    startOfWeek.setDate(d.getDate() - d.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    const key = startOfWeek.toISOString().slice(0, 10);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    const existing = weekMap.get(key);
+    if (existing) {
+      existing.profit += bill.totalProfit;
+      existing.revenue += bill.totalSaleAmount;
+      existing.bills += 1;
+    } else {
+      const startStr = startOfWeek.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+      const endStr = endOfWeek.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+      weekMap.set(key, {
+        label: `${startStr} - ${endStr}`,
+        profit: bill.totalProfit,
+        revenue: bill.totalSaleAmount,
+        bills: 1,
+        startDate: startOfWeek,
+      });
+    }
+  }
+
+  const weeklyProfits = Array.from(weekMap.values()).sort((a, b) => b.startDate.getTime() - a.startDate.getTime());
+
   return (
     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
-      {/* Summary */}
+      {/* Summary + Weekly Profits */}
       <div className="mb-5">
         <h3 className="text-sm sm:text-md font-extrabold text-blue-900 uppercase tracking-wider mb-3">
           Bill History ({totalBills} bills)
         </h3>
-        <div className="grid grid-cols-2 gap-2 sm:gap-4">
-          <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-            <i className="fa-solid fa-chart-line text-green-600 text-xs sm:text-sm hidden sm:block"></i>
+        <div className="flex gap-2 sm:gap-3">
+          <div className="flex-1 flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2 min-w-0">
+            <i className="fa-solid fa-chart-line text-green-600 text-xs sm:text-sm hidden sm:block shrink-0"></i>
             <div className="min-w-0">
               <p className="text-[10px] sm:text-xs font-bold text-green-700 uppercase truncate">Total Profit</p>
               <p className="text-base sm:text-xl font-black text-green-900">₹{totalProfit.toFixed(0)}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-            <i className="fa-solid fa-indian-rupee-sign text-blue-600 text-xs sm:text-sm hidden sm:block"></i>
+          <div className="flex-1 flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 min-w-0">
+            <i className="fa-solid fa-indian-rupee-sign text-blue-600 text-xs sm:text-sm hidden sm:block shrink-0"></i>
             <div className="min-w-0">
               <p className="text-[10px] sm:text-xs font-bold text-blue-700 uppercase truncate">Total Revenue</p>
               <p className="text-base sm:text-xl font-black text-blue-900">₹{totalRevenue.toFixed(0)}</p>
             </div>
           </div>
+          {weeklyProfits.map((week, i) => (
+            <div
+              key={i}
+              className="flex-1 flex items-center gap-2 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg px-3 py-2 min-w-0"
+            >
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-xs font-bold text-green-700 uppercase truncate">{week.label}</p>
+                <p className="text-base sm:text-xl font-black text-green-900">₹{week.profit.toFixed(0)}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
