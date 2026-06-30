@@ -23,7 +23,7 @@ interface BillGroup {
   totalMRP: number;
   totalSaleAmount: number;
   totalDiscount: number;
-  paymentMode: string;
+  totalProfit: number;
   date: string;
   itemCount: number;
 }
@@ -35,11 +35,9 @@ interface Props {
 }
 
 function BillActionMenu({
-  bill,
   onView,
   onDelete,
 }: {
-  bill: BillGroup;
   onView: () => void;
   onDelete: () => void;
 }) {
@@ -138,7 +136,7 @@ export default function BillHistory({ completedSales, onViewBill, onDeleteBill }
       totalMRP: items.reduce((sum, s) => sum + s.mrp, 0),
       totalSaleAmount: items.reduce((sum, s) => sum + s.saleAmount, 0),
       totalDiscount: items.reduce((sum, s) => sum + s.discount, 0),
-      paymentMode: items[0].paymentMode,
+      totalProfit: items.reduce((sum, s) => sum + (s.saleAmount - s.mrp / 2), 0),
       date: items[0].dateTime,
       itemCount: items.length,
     });
@@ -147,20 +145,8 @@ export default function BillHistory({ completedSales, onViewBill, onDeleteBill }
   billGroups.sort((a, b) => b.items[0].id - a.items[0].id);
 
   const totalRevenue = billGroups.reduce((sum, b) => sum + b.totalSaleAmount, 0);
+  const totalProfit = billGroups.reduce((sum, b) => sum + b.totalProfit, 0);
   const totalBills = billGroups.length;
-
-  const paymentBadge = (mode: string) => {
-    const styles: Record<string, string> = {
-      Cash: "bg-green-100 text-green-700",
-      UPI: "bg-purple-100 text-purple-700",
-      Card: "bg-blue-100 text-blue-700",
-    };
-    return (
-      <span className={`px-3 py-1 rounded-full text-xs font-bold ${styles[mode] || ""}`}>
-        {mode}
-      </span>
-    );
-  };
 
   return (
     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -169,9 +155,14 @@ export default function BillHistory({ completedSales, onViewBill, onDeleteBill }
           Bill History ({totalBills} bills)
         </h3>
         <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-2">
+            <i className="fa-solid fa-chart-line text-green-600"></i>
+            <span className="text-sm font-bold text-green-700 uppercase">Total Profit :</span>
+            <span className="text-xl font-black text-green-900">₹ {totalProfit.toFixed(2)}</span>
+          </div>
           <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
             <i className="fa-solid fa-indian-rupee-sign text-blue-600"></i>
-            <span className="text-sm font-bold text-blue-700 uppercase">Total Revenue:</span>
+            <span className="text-sm font-bold text-blue-700 uppercase">Total Revenue :</span>
             <span className="text-xl font-black text-blue-900">₹ {totalRevenue.toFixed(2)}</span>
           </div>
         </div>
@@ -187,7 +178,7 @@ export default function BillHistory({ completedSales, onViewBill, onDeleteBill }
               <th className="py-3 px-4 bg-red-100 text-red-700">Total MRP (₹)</th>
               <th className="py-3 px-4 bg-emerald-100 text-emerald-700">Total Sale (₹)</th>
               <th className="py-3 px-4 bg-amber-100 text-amber-700">Discount (₹)</th>
-              <th className="py-3 px-4 bg-purple-100 text-purple-700 text-center">Payment</th>
+              <th className="py-3 px-4 bg-green-100 text-green-700">Profit (₹)</th>
               <th className="py-3 px-4 bg-slate-100 text-slate-700 text-center">Action</th>
             </tr>
           </thead>
@@ -207,10 +198,9 @@ export default function BillHistory({ completedSales, onViewBill, onDeleteBill }
                   <td className="py-2 px-4 font-semibold text-red-600">₹ {bill.totalMRP.toFixed(2)}</td>
                   <td className="py-2 px-4 font-semibold text-emerald-600">₹ {bill.totalSaleAmount.toFixed(2)}</td>
                   <td className="py-2 px-4 text-amber-600">₹ {bill.totalDiscount.toFixed(2)}</td>
-                  <td className="py-2 px-4 text-center">{paymentBadge(bill.paymentMode)}</td>
+                  <td className="py-2 px-4 font-bold text-green-600">₹ {bill.totalProfit.toFixed(2)}</td>
                   <td className="py-2 px-4 text-center">
                     <BillActionMenu
-                      bill={bill}
                       onView={() => onViewBill(bill.items)}
                       onDelete={() => setConfirmDelete(bill.billId)}
                     />

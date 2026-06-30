@@ -8,6 +8,21 @@ import SaleForm from "@/components/SaleForm";
 import SaleTable from "@/components/SaleTable";
 import BillHistory from "@/components/BillHistory";
 import BillView from "@/components/BillView";
+import Login from "@/components/Login";
+
+interface FirebaseSale {
+  id: number;
+  dateTime: string;
+  productName: string;
+  mrp: number;
+  saleAmount: number;
+  discount: number;
+  paymentMode: string;
+  status: string;
+  billId: string | null;
+  createdAt: string;
+  checkedOutAt?: string;
+}
 
 interface Sale {
   firebaseKey?: string;
@@ -51,6 +66,7 @@ export default function Home() {
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
   const [viewingBill, setViewingBill] = useState<Sale[] | null>(null);
   const [activeTab, setActiveTab] = useState<"cart" | "history">("cart");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     if (!database) return;
@@ -58,20 +74,23 @@ export default function Home() {
     onValue(salesRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const loaded: Sale[] = Object.entries(data).map(([key, val]: [string, any]) => ({
+        const loaded: Sale[] = Object.entries(data).map(([key, val]) => {
+          const v = val as FirebaseSale;
+          return {
           firebaseKey: key,
-          id: val.id,
-          dateTime: val.dateTime,
-          productName: val.productName || "",
-          mrp: val.mrp,
-          saleAmount: val.saleAmount,
-          discount: val.discount,
-          paymentMode: val.paymentMode,
-          status: val.status || "PENDING",
-          billId: val.billId || null,
-          createdAt: val.createdAt || "",
-          checkedOutAt: val.checkedOutAt || undefined,
-        }));
+          id: v.id,
+          dateTime: v.dateTime,
+          productName: v.productName || "",
+          mrp: v.mrp,
+          saleAmount: v.saleAmount,
+          discount: v.discount,
+          paymentMode: v.paymentMode,
+          status: (v.status || "PENDING") as "PENDING" | "COMPLETED",
+          billId: v.billId || null,
+          createdAt: v.createdAt || "",
+          checkedOutAt: v.checkedOutAt || undefined,
+        };
+        });
         loaded.sort((a, b) => b.id - a.id);
         setAllSales(loaded);
       } else {
@@ -165,7 +184,7 @@ export default function Home() {
 
     try {
       if (database) {
-        const updates: Record<string, any> = {};
+        const updates: Record<string, string | null> = {};
         for (const sale of pendingSales) {
           if (sale.firebaseKey) {
             updates[`sales/${sale.firebaseKey}/status`] = "COMPLETED";
@@ -201,38 +220,43 @@ export default function Home() {
 
   return (
     <>
-      <Header onNavigate={setActiveTab} activeTab={activeTab} />
-      <main className="max-w-7xl mx-auto px-4 mt-8 space-y-8">
-        {activeTab === "cart" && (
-          <>
-            <SaleForm
-              onAddSale={handleAddSale}
-              editingSale={editingSale}
-              onUpdateSale={handleUpdateSale}
-              onCancelEdit={() => setEditingSale(null)}
-              productNames={productNames}
-            />
-            <SaleTable
-              sales={pendingSales}
-              onDelete={handleDelete}
-              onEdit={handleEdit}
-              isEditing={!!editingSale}
-              onCheckout={handleCheckout}
-            />
-          </>
-        )}
+      {!isLoggedIn && <Login onLogin={() => setIsLoggedIn(true)} />}
+      {isLoggedIn && (
+        <>
+          <Header onNavigate={setActiveTab} activeTab={activeTab} onLogout={() => setIsLoggedIn(false)} />
+          <main className="max-w-7xl mx-auto px-4 mt-8 space-y-8">
+            {activeTab === "cart" && (
+              <>
+                <SaleForm
+                  onAddSale={handleAddSale}
+                  editingSale={editingSale}
+                  onUpdateSale={handleUpdateSale}
+                  onCancelEdit={() => setEditingSale(null)}
+                  productNames={productNames}
+                />
+                <SaleTable
+                  sales={pendingSales}
+                  onDelete={handleDelete}
+                  onEdit={handleEdit}
+                  isEditing={!!editingSale}
+                  onCheckout={handleCheckout}
+                />
+              </>
+            )}
 
-        {activeTab === "history" && (
-          <BillHistory
-            completedSales={completedSales}
-            onViewBill={(sales) => setViewingBill(sales)}
-            onDeleteBill={handleDeleteBill}
-          />
-        )}
-      </main>
+            {activeTab === "history" && (
+              <BillHistory
+                completedSales={completedSales}
+                onViewBill={(sales) => setViewingBill(sales)}
+                onDeleteBill={handleDeleteBill}
+              />
+            )}
+          </main>
 
-      {viewingBill && (
-        <BillView sales={viewingBill} onClose={() => setViewingBill(null)} />
+          {viewingBill && (
+            <BillView sales={viewingBill} onClose={() => setViewingBill(null)} />
+          )}
+        </>
       )}
     </>
   );

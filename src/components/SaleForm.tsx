@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface Sale {
   productName: string;
@@ -18,20 +18,11 @@ interface Props {
 }
 
 export default function SaleForm({ onAddSale, editingSale, onUpdateSale, onCancelEdit, productNames = [] }: Props) {
-  const [productName, setProductName] = useState("");
-  const [mrp, setMrp] = useState("");
-  const [saleAmount, setSaleAmount] = useState("");
-  const [paymentMode, setPaymentMode] = useState("Cash");
+  const [productName, setProductName] = useState(editingSale?.productName || "");
+  const [mrp, setMrp] = useState(editingSale?.mrp?.toString() || "");
+  const [saleAmount, setSaleAmount] = useState(editingSale?.saleAmount?.toString() || "");
+  const [paymentMode, setPaymentMode] = useState(editingSale?.paymentMode || "Cash");
   const [showSuggestions, setShowSuggestions] = useState(false);
-
-  useEffect(() => {
-    if (editingSale) {
-      setProductName(editingSale.productName);
-      setMrp(editingSale.mrp.toString());
-      setSaleAmount(editingSale.saleAmount.toString());
-      setPaymentMode(editingSale.paymentMode);
-    }
-  }, [editingSale]);
 
   const discount = Math.max(0, (parseFloat(mrp) || 0) - (parseFloat(saleAmount) || 0));
 

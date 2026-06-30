@@ -113,7 +113,6 @@ export default function SaleTable({ sales, onDelete, onEdit, isEditing, onChecko
   const totalMRP = sales.reduce((sum, s) => sum + s.mrp, 0);
   const totalSaleAmount = sales.reduce((sum, s) => sum + s.saleAmount, 0);
   const totalDiscount = sales.reduce((sum, s) => sum + s.discount, 0);
-  const totalProducts = sales.length;
 
   const paymentBadge = (mode: string) => {
     const styles: Record<string, string> = {
