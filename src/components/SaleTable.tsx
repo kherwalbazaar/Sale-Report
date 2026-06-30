@@ -128,32 +128,87 @@ export default function SaleTable({ sales, onDelete, onEdit, isEditing, onChecko
   };
 
   return (
-    <section className={`bg-white rounded-2xl shadow-sm border border-gray-100 p-6 transition ${isEditing ? "opacity-50 pointer-events-none" : ""}`}>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-5 gap-4">
-        <h3 className="text-md font-extrabold text-blue-900 uppercase tracking-wider">
+    <section className={`bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 transition ${isEditing ? "opacity-50 pointer-events-none" : ""}`}>
+      {/* Summary Cards */}
+      <div className="mb-5">
+        <h3 className="text-sm sm:text-md font-extrabold text-blue-900 uppercase tracking-wider mb-3">
           Current Cart
         </h3>
-        <div className="flex items-center gap-4 flex-wrap">
-          <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
-            <i className="fa-solid fa-indian-rupee-sign text-blue-600"></i>
-            <span className="text-sm font-bold text-blue-700 uppercase">Total MRP :</span>
-            <span className="text-xl font-black text-blue-900">₹ {totalMRP.toFixed(2)}</span>
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+            <i className="fa-solid fa-indian-rupee-sign text-blue-600 text-xs sm:text-sm hidden sm:block"></i>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-bold text-blue-700 uppercase truncate">Total MRP</p>
+              <p className="text-base sm:text-xl font-black text-blue-900">₹{totalMRP.toFixed(0)}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-2">
-            <i className="fa-solid fa-chart-line text-green-600"></i>
-            <span className="text-sm font-bold text-green-700 uppercase">Sale Amount :</span>
-            <span className="text-xl font-black text-green-900">₹ {totalSaleAmount.toFixed(2)}</span>
+          <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+            <i className="fa-solid fa-chart-line text-green-600 text-xs sm:text-sm hidden sm:block"></i>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-bold text-green-700 uppercase truncate">Sale Amt</p>
+              <p className="text-base sm:text-xl font-black text-green-900">₹{totalSaleAmount.toFixed(0)}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
-            <i className="fa-solid fa-percent text-amber-600"></i>
-            <span className="text-sm font-bold text-amber-700 uppercase">Discount :</span>
-            <span className="text-xl font-black text-amber-900">₹ {totalDiscount.toFixed(2)}</span>
+          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+            <i className="fa-solid fa-percent text-amber-600 text-xs sm:text-sm hidden sm:block"></i>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-bold text-amber-700 uppercase truncate">Discount</p>
+              <p className="text-base sm:text-xl font-black text-amber-900">₹{totalDiscount.toFixed(0)}</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse table-fixed">
+      {/* Mobile: Card Layout */}
+      <div className="md:hidden space-y-3">
+        {sales.length === 0 ? (
+          <div className="py-8 text-center text-gray-400 text-sm">
+            No items in cart. Add a sale to get started.
+          </div>
+        ) : (
+          sales.map((sale, index) => (
+            <div
+              key={sale.firebaseKey || sale.id}
+              className="bg-slate-50 rounded-xl p-3 border border-gray-100"
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center shrink-0">
+                    {index + 1}
+                  </span>
+                  <span className="text-[10px] sm:text-sm font-bold text-indigo-700 truncate">{sale.productName}</span>
+                </div>
+                <ActionMenu sale={sale} onDelete={onDelete} onEdit={onEdit} />
+              </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] sm:text-xs">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">MRP</span>
+                  <span className="font-bold text-red-600">₹{sale.mrp.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Sale</span>
+                  <span className="font-bold text-emerald-600">₹{sale.saleAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Discount</span>
+                  <span className="font-bold text-amber-600">₹{sale.discount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">Mode</span>
+                  {paymentBadge(sale.paymentMode)}
+                </div>
+              </div>
+              <div className="mt-2 pt-2 border-t border-gray-200 text-[8px] sm:text-[10px] text-gray-400 flex justify-between">
+                <span>{sale.dateTime}</span>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop: Table Layout */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-gray-200 text-xs font-bold uppercase">
               <th className="py-3 px-4 bg-slate-100 text-slate-700 w-12 text-center">SL No.</th>
@@ -193,22 +248,24 @@ export default function SaleTable({ sales, onDelete, onEdit, isEditing, onChecko
         </table>
       </div>
 
+      {/* Checkout Button */}
       <div className="mt-6 flex justify-center">
         <button
           onClick={() => setShowConfirm(true)}
           disabled={sales.length === 0}
-          className={`text-white font-bold py-3 px-8 rounded-lg transition flex items-center gap-2 ${sales.length === 0 ? "bg-gray-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/10"}`}
+          className={`w-full sm:w-auto text-white font-bold py-3 px-8 rounded-lg transition flex items-center justify-center gap-2 ${sales.length === 0 ? "bg-gray-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/10"}`}
         >
           <i className="fa-solid fa-check-double"></i>
           <span>CHECK OUT</span>
         </button>
       </div>
 
+      {/* Checkout Confirmation Modal */}
       {showConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-5 sm:p-6 max-w-sm w-full shadow-xl">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
                 <i className="fa-solid fa-receipt text-blue-600"></i>
               </div>
               <h4 className="font-bold text-gray-900">Confirm Checkout</h4>

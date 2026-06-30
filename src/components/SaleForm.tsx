@@ -65,15 +65,15 @@ export default function SaleForm({ onAddSale, editingSale, onUpdateSale, onCance
   };
 
   return (
-    <section className="max-w-sm mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-      <div className="flex items-center justify-center gap-2 text-indigo-900 font-bold text-xl uppercase tracking-wider mb-6">
+    <section className="max-w-sm mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 md:p-8">
+      <div className="flex items-center justify-center gap-2 text-indigo-900 font-bold text-xl uppercase tracking-wider mb-4">
         <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm text-white ${editingSale ? "bg-amber-500" : "bg-blue-600"}`}>
           <i className={`fa-solid ${editingSale ? "fa-pen-to-square" : "fa-cart-shopping"}`}></i>
         </span>
         <h2>{editingSale ? "Edit Sale" : "Add New Sale"}</h2>
       </div>
 
-      <form className="space-y-5" onSubmit={handleSubmit}>
+      <form className="space-y-3" onSubmit={handleSubmit}>
         <div className="relative">
           <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
             Product Name
@@ -85,7 +85,7 @@ export default function SaleForm({ onAddSale, editingSale, onUpdateSale, onCance
             onChange={(e) => { setProductName(e.target.value); setShowSuggestions(true); }}
             onFocus={() => setShowSuggestions(true)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-lg sm:text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
           />
           {showSuggestions && filteredSuggestions.length > 0 && (
             <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-32 overflow-y-auto">
@@ -102,13 +102,13 @@ export default function SaleForm({ onAddSale, editingSale, onUpdateSale, onCance
             </div>
           )}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
               MRP
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-black text-3xl">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-black text-2xl sm:text-3xl">
                 ₹
               </span>
               <input
@@ -118,7 +118,7 @@ export default function SaleForm({ onAddSale, editingSale, onUpdateSale, onCance
                 min="0"
                 value={mrp}
                 onChange={(e) => setMrp(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 text-3xl font-black focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2.5 sm:py-3 text-2xl sm:text-3xl font-black focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
               />
             </div>
           </div>
@@ -127,7 +127,7 @@ export default function SaleForm({ onAddSale, editingSale, onUpdateSale, onCance
               Sale Amount
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-black text-3xl">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-black text-2xl sm:text-3xl">
                 ₹
               </span>
               <input
@@ -137,7 +137,7 @@ export default function SaleForm({ onAddSale, editingSale, onUpdateSale, onCance
                 min="0"
                 value={saleAmount}
                 onChange={(e) => setSaleAmount(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 text-3xl font-black focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2.5 sm:py-3 text-2xl sm:text-3xl font-black focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
               />
             </div>
           </div>
@@ -158,17 +158,17 @@ export default function SaleForm({ onAddSale, editingSale, onUpdateSale, onCance
           </select>
         </div>
 
-        <div className="bg-green-50/60 border border-green-200/80 rounded-xl p-4 flex justify-between items-center">
+        <div className="bg-green-50/60 border border-green-200/80 rounded-xl p-2.5 sm:p-3 flex justify-between items-center">
           <div>
-            <p className="text-xs font-bold text-green-700 uppercase tracking-wide">
+            <p className="text-[10px] sm:text-xs font-bold text-green-700 uppercase tracking-wide">
               Discount Price
             </p>
-            <p className="text-3xl font-black text-green-600 mt-1">
+            <p className="text-2xl sm:text-3xl font-black text-green-600 mt-1">
               ₹ {discount.toFixed(2)}
             </p>
           </div>
-          <div className="text-green-600 text-3xl opacity-80">
-            <i className="fa-solid fa-percent bg-green-100 p-3 rounded-full"></i>
+          <div className="text-green-600 text-2xl sm:text-3xl opacity-80">
+            <i className="fa-solid fa-percent bg-green-100 p-2 sm:p-3 rounded-full"></i>
           </div>
         </div>
 

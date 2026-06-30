@@ -224,7 +224,7 @@ export default function Home() {
       {isLoggedIn && (
         <>
           <Header onNavigate={setActiveTab} activeTab={activeTab} onLogout={() => setIsLoggedIn(false)} />
-          <main className="max-w-7xl mx-auto px-4 mt-8 space-y-8">
+          <main className="max-w-7xl mx-auto px-3 sm:px-4 mt-4 sm:mt-8 space-y-6 sm:space-y-8">
             {activeTab === "cart" && (
               <>
                 <SaleForm

@@ -149,26 +149,81 @@ export default function BillHistory({ completedSales, onViewBill, onDeleteBill }
   const totalBills = billGroups.length;
 
   return (
-    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-5 gap-4">
-        <h3 className="text-md font-extrabold text-blue-900 uppercase tracking-wider">
+    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+      {/* Summary */}
+      <div className="mb-5">
+        <h3 className="text-sm sm:text-md font-extrabold text-blue-900 uppercase tracking-wider mb-3">
           Bill History ({totalBills} bills)
         </h3>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-2">
-            <i className="fa-solid fa-chart-line text-green-600"></i>
-            <span className="text-sm font-bold text-green-700 uppercase">Total Profit :</span>
-            <span className="text-xl font-black text-green-900">₹ {totalProfit.toFixed(2)}</span>
+        <div className="grid grid-cols-2 gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+            <i className="fa-solid fa-chart-line text-green-600 text-xs sm:text-sm hidden sm:block"></i>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-bold text-green-700 uppercase truncate">Total Profit</p>
+              <p className="text-base sm:text-xl font-black text-green-900">₹{totalProfit.toFixed(0)}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
-            <i className="fa-solid fa-indian-rupee-sign text-blue-600"></i>
-            <span className="text-sm font-bold text-blue-700 uppercase">Total Revenue :</span>
-            <span className="text-xl font-black text-blue-900">₹ {totalRevenue.toFixed(2)}</span>
+          <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+            <i className="fa-solid fa-indian-rupee-sign text-blue-600 text-xs sm:text-sm hidden sm:block"></i>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-bold text-blue-700 uppercase truncate">Total Revenue</p>
+              <p className="text-base sm:text-xl font-black text-blue-900">₹{totalRevenue.toFixed(0)}</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Mobile: Card Layout */}
+      <div className="md:hidden space-y-3">
+        {billGroups.length === 0 ? (
+          <div className="py-8 text-center text-gray-400 text-sm">
+            No bills found. Complete a checkout to see history.
+          </div>
+        ) : (
+          billGroups.map((bill) => (
+            <div
+              key={bill.billId}
+              className="bg-slate-50 rounded-xl p-3 border border-gray-100"
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs font-mono font-bold text-slate-700 truncate">{bill.billId}</p>
+                  <p className="text-[8px] sm:text-[10px] text-gray-400 mt-0.5">{bill.date}</p>
+                </div>
+                <BillActionMenu
+                  onView={() => onViewBill(bill.items)}
+                  onDelete={() => setConfirmDelete(bill.billId)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] sm:text-xs">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Items</span>
+                  <span className="font-bold text-indigo-700">{bill.itemCount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">MRP</span>
+                  <span className="font-bold text-red-600">₹{bill.totalMRP.toFixed(0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Sale</span>
+                  <span className="font-bold text-emerald-600">₹{bill.totalSaleAmount.toFixed(0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Discount</span>
+                  <span className="font-bold text-amber-600">₹{bill.totalDiscount.toFixed(0)}</span>
+                </div>
+              </div>
+              <div className="mt-2 pt-2 border-t border-gray-200 flex justify-between items-center">
+                <span className="text-[8px] sm:text-[10px] text-gray-400">{bill.itemCount} item{bill.itemCount > 1 ? "s" : ""}</span>
+                <span className="text-[10px] sm:text-xs font-black text-green-600">Profit: ₹{bill.totalProfit.toFixed(0)}</span>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop: Table Layout */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-gray-200 text-xs font-bold uppercase">
@@ -212,17 +267,18 @@ export default function BillHistory({ completedSales, onViewBill, onDeleteBill }
         </table>
       </div>
 
+      {/* Delete Confirmation Modal */}
       {confirmDelete && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-5 sm:p-6 max-w-sm w-full shadow-xl">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center shrink-0">
                 <i className="fa-solid fa-triangle-exclamation text-red-600"></i>
               </div>
               <h4 className="font-bold text-gray-900">Delete Bill?</h4>
             </div>
             <p className="text-sm text-gray-600 mb-6">
-              This will permanently delete bill <strong>{confirmDelete}</strong> and all its items. This action cannot be undone.
+              This will permanently delete bill <strong className="break-all">{confirmDelete}</strong> and all its items. This action cannot be undone.
             </p>
             <div className="flex gap-3 justify-end">
               <button
