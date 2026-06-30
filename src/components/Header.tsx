@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 interface Props {
   onNavigate?: (tab: "cart" | "history") => void;
@@ -15,6 +16,18 @@ export default function Header({ onNavigate, activeTab, onLogout }: Props) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const warningShown = useRef(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    resetTimer();
+  }, [pathname]);
+
+  const resetTimer = () => {
+    setRemaining(SESSION_MINUTES * 60);
+    warningShown.current = false;
+    setShowWarning(false);
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -24,12 +37,29 @@ export default function Header({ onNavigate, activeTab, onLogout }: Props) {
           onLogout?.();
           return 0;
         }
-        if (prev === 300) setShowWarning(true);
+        if (prev === 300 && !warningShown.current) {
+          warningShown.current = true;
+          setShowWarning(true);
+        }
         return prev - 1;
       });
     }, 1000);
     return () => { clearInterval(interval); };
   }, [onLogout]);
+
+  useEffect(() => {
+    function handleActivity() {
+      resetTimer();
+    }
+    document.addEventListener("input", handleActivity);
+    document.addEventListener("change", handleActivity);
+    document.addEventListener("submit", handleActivity);
+    return () => {
+      document.removeEventListener("input", handleActivity);
+      document.removeEventListener("change", handleActivity);
+      document.removeEventListener("submit", handleActivity);
+    };
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
